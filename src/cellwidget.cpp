@@ -125,10 +125,12 @@ void CellWidget::onLightClicked() {
     if (lightTimer->isActive()) {
         lightTimer->stop();
         lightButton->setText("Свет: Выкл");
+        lightState = 0;
     } else {
         lightTimer->start(500); // Мигать каждые 500 мс
         lightButton->setText("Свет: Мигает");
     }
+
 }
 
 

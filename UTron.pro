@@ -7,10 +7,12 @@ SOURCES += \
     src/main.cpp \
     src/mainwindow.cpp \
     src/mainwindow.cpp \
-    src/cellwidget.cpp
+    src/cellwidget.cpp \
+    src/modbus-cells-state.cpp
 
 HEADERS += \
     src/cellwidget.h \
     src/mainwindow.h \
     src/mainwindow.h \
-    src/cellwidget.h
+    src/cellwidget.h \
+    src/modbus-cells-state.h

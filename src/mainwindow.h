@@ -9,6 +9,7 @@
 #include <QTextStream>
 #include <QModbusRtuSerialClient>
 #include "cellwidget.h"
+#include "modbus-cells-state.h"
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
@@ -18,7 +19,7 @@ public:
     ~MainWindow();
 
 private:
-    QModbusRtuSerialClient *modbusClient;                  // Новый клиент Modbus
+    ModbusCellsState* mcs;
     QVector<CellWidget *> cells;                           // Массив всех ячеек
     QComboBox *modeSelector;                               // Переключатель режима
     QLabel *modbusStatus;                                  // Статус Modbus
@@ -33,7 +34,6 @@ private:
     QLineEdit *baudRateEdit;
 
     void setupModbusUI(QVBoxLayout *layout);
-    void setupModbusClient();                              // Метод настройки клиента
     void connectModbusSignals();                           // Подключение сигналов для работы с Modbus
     void logMessage(const QString &message);
 private slots:

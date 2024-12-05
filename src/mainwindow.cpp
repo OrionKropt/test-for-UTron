@@ -10,6 +10,7 @@
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), isSimulation(true) {
+    mcs = new ModbusCellsState();
     // Открытие файла для логов
     logFile.setFileName("modbus_log.txt");
     logFile.open(QIODevice::Append | QIODevice::Text);
@@ -70,10 +71,7 @@ MainWindow::MainWindow(QWidget *parent)
 }
 
 MainWindow::~MainWindow() {
-    if (modbusClient) {
-        modbusClient->disconnectDevice();
-        delete modbusClient;
-    }
+    delete mcs;
     logFile.close();
 }
 
@@ -106,20 +104,28 @@ void MainWindow::onModeChanged(int index) {
     modbusStatus->setText(QString("Текущий режим: %1")
                               .arg(isSimulation ? "Эмуляция" : "Реальный Modbus"));
 
-    if (!isSimulation && modbusClient == nullptr) {
-        setupModbusClient();
-    } else if (isSimulation && modbusClient) {
-        modbusClient->disconnectDevice();
-        delete modbusClient;
-        modbusClient = nullptr;
+    if (!isSimulation) {
+        mcs->setupModbusClient(this,
+                               portEdit->text(),
+                               baudRateCombo->currentText().toInt(),
+                               QSerialPort::Data8,
+                               QSerialPort::OneStop,
+                               QSerialPort::NoParity);
+    } else if (isSimulation && mcs->isConnectToDevice()) {
+        mcs->disconnect();
         modbusStatus->setText("Соединение Modbus закрыто (Эмуляция)");
     }
 }
 
 void MainWindow::onApplySettingsClicked() {
-    if (modbusClient) {
-        modbusClient->disconnectDevice();
-        setupModbusClient();
+    if (mcs->isConnectToDevice()) {
+        mcs->disconnect();
+        mcs->setupModbusClient(this,
+                               portEdit->text(),
+                               baudRateCombo->currentText().toInt(),
+                               QSerialPort::Data8,
+                               QSerialPort::OneStop,
+                               QSerialPort::NoParity);
         logMessage("Modbus настройки применены.");
     }
 }
@@ -142,27 +148,27 @@ void MainWindow::updateCellStates() {
 
 }
 
-void MainWindow::setupModbusClient() {
-    if (modbusClient) {
-        delete modbusClient;
-    }
-    modbusClient = new QModbusRtuSerialClient(this);
+// void MainWindow::setupModbusClient() {
+//     if (modbusClient) {
+//         delete modbusClient;
+//     }
+//     modbusClient = new QModbusRtuSerialClient(this);
 
-    modbusClient->setConnectionParameter(QModbusDevice::SerialPortNameParameter, portEdit->text());
-    modbusClient->setConnectionParameter(QModbusDevice::SerialBaudRateParameter, baudRateCombo->currentText().toInt());
-    modbusClient->setConnectionParameter(QModbusDevice::SerialDataBitsParameter, QSerialPort::Data8);
-    modbusClient->setConnectionParameter(QModbusDevice::SerialStopBitsParameter, QSerialPort::OneStop);
-    modbusClient->setConnectionParameter(QModbusDevice::SerialParityParameter, QSerialPort::NoParity);
+//     modbusClient->setConnectionParameter(QModbusDevice::SerialPortNameParameter, portEdit->text());
+//     modbusClient->setConnectionParameter(QModbusDevice::SerialBaudRateParameter, baudRateCombo->currentText().toInt());
+//     modbusClient->setConnectionParameter(QModbusDevice::SerialDataBitsParameter, QSerialPort::Data8);
+//     modbusClient->setConnectionParameter(QModbusDevice::SerialStopBitsParameter, QSerialPort::OneStop);
+//     modbusClient->setConnectionParameter(QModbusDevice::SerialParityParameter, QSerialPort::NoParity);
 
-    modbusClient->setTimeout(2000);
-    modbusClient->setNumberOfRetries(3);
+//     modbusClient->setTimeout(1000);
+//     modbusClient->setNumberOfRetries(3);
 
-    if (modbusClient->connectDevice()) {
-        modbusStatus->setText("Modbus подключён");
-    } else {
-        modbusStatus->setText(QString("Ошибка подключения Modbus: %1").arg(modbusClient->errorString()));
-    }
-}
+//     if (modbusClient->connectDevice()) {
+//         modbusStatus->setText("Modbus подключён");
+//     } else {
+//         modbusStatus->setText(QString("Ошибка подключения Modbus: %1").arg(modbusClient->errorString()));
+//     }
+// }
 
 void MainWindow::logMessage(const QString &message) {
     QTextStream logStream(&logFile);
