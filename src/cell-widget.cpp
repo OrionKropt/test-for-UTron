@@ -1,4 +1,4 @@
-#include "cellwidget.h"
+#include "cell-widget.h"
 #include <QMessageBox>
 #include <QTimer>
 

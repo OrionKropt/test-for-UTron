@@ -8,8 +8,9 @@
 #include <QFile>
 #include <QTextStream>
 #include <QModbusRtuSerialClient>
-#include "cellwidget.h"
+#include "cell-widget.h"
 #include "modbus-cells-state.h"
+#include "logger.h"
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
@@ -21,13 +22,14 @@ public:
 private:
     ModbusCellsState* mcs;
     QVector<CellWidget *> cells;                           // Массив всех ячеек
+    const int cellsCount;
     QComboBox *modeSelector;                               // Переключатель режима
     QLabel *modbusStatus;                                  // Статус Modbus
     QComboBox *baudRateCombo;                              // Выбор скорости Modbus
     bool isSimulation;                                     // Флаг режима (эмуляция или реальный Modbus)
     QPushButton *applySettingsButton;
     QPushButton *manualUpdateButton;
-    QFile logFile;
+    Logger *logger;
 
     // Поля и методы для настройки Modbus
     QLineEdit *portEdit;
@@ -35,7 +37,6 @@ private:
 
     void setupModbusUI(QVBoxLayout *layout);
     void connectModbusSignals();                           // Подключение сигналов для работы с Modbus
-    void logMessage(const QString &message);
 private slots:
     void onModeChanged(int index);
     void onApplySettingsClicked();
